@@ -1,0 +1,7 @@
+/.idea
+/.vscode
+/node_modules/
+/dist
+.gitignore
+Dockerfile
+docker-compose.yaml
