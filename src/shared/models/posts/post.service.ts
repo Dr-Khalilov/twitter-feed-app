@@ -4,7 +4,7 @@ import { Request } from 'express';
 import { PostRepository } from './post.repository';
 import { CreatePostDto } from './post.dto';
 import { PostEntity } from './post.entity';
-import { paginateResponse } from '../utils/paginate.util';
+import { paginateResponse } from '../../utils/paginate.util';
 import { IQuery } from './query.interface';
 
 @Injectable()
