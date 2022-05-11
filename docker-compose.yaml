@@ -71,17 +71,6 @@ services:
       - certs-client:/certs
     depends_on:
       - lb
-  rabbitmq:
-    image: rabbitmq:3-management
-    container_name: rabbitmq
-    hostname: rabbitmq
-    volumes:
-      - /var/lib/rabbitmq
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    env_file:
-      - ./rabbitmq.env
   main:
     container_name: main
     build:
@@ -97,6 +86,17 @@ services:
     command: npm run start:dev
     depends_on:
       - roach-0
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    hostname: rabbitmq
+    volumes:
+      - /var/lib/rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    env_file:
+      - ./rabbitmq.env
 
 volumes:
   certs-roach-0:

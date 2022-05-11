@@ -6,6 +6,7 @@
 /roach-1
 /roach-2
 *.code-workspace
+/certs
 
 # Logs
 logs
