@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" type="text/css" href="/assets/styles/style.css">
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+  <!-- Don't use this in production: -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <title>Twitter Profile</title>
+</head>
+<body>
+<header id="main-header">
+  <div class="content">
+    <nav>
+      <ul>
+        <li>
+          <img src="/assets/images/home.svg" alt="Home"> Home
+        </li>
+        <li>
+          <img src="/assets/images/notification.svg" alt="Notifications"> Notifications
+        </li>
+        <li>
+          <img src="/assets/images/message.svg" alt="Messages"> Messages
+        </li>
+      </ul>
+    </nav>
+    <img src="/assets/images/logo.svg" alt="Logo Twitter">
+    <div class="side">
+      <label>
+        <input type="text" placeholder="Search on Twitter">
+      </label>
+      <img src="/assets/images/avatar.png" alt="Avatar">
+      <button>Tweet</button>
+    </div>
+  </div>
+</header>
+
+<div class="banner">
+  <h1>Twitter Cyberarrow</h1>
+</div>
+
+<div class="bar">
+  <div class="content">
+    <ul>
+      <li class="active">
+        <span>Tweet</span>
+        <strong>1234</strong>
+      </li>
+      <li>
+        <span>Followings</span>
+        <strong>124</strong>
+      </li>
+      <li>
+        <span>Followers</span>
+        <strong>134</strong>
+      </li>
+      <li>
+        <span>Favorites</span>
+        <strong>14</strong>
+      </li>
+    </ul>
+    <div class="actions">
+      <button>Follow</button>
+      <img src="/assets/images/more.svg" alt="More">
+    </div>
+  </div>
+</div>
+
+<div class="wrapper-content content">
+  <aside class="profile">
+    <img class="avatar" src="/assets/images/avatar.png" alt="Beatriz Cantilho">
+    <h1>Beatriz Cantilho</h1>
+    <span>@bcantilho</span>
+    <p>Software developer and sometimes gamer</p>
+
+    <ul class="list">
+      <li><img src="/assets/images/place.svg" alt="place"> Halifax, Canadá</li>
+      <li><img src="/assets/images/url.svg" alt="url"> bcantilho.dev</li>
+      <li><img src="/assets/images/joined.svg" alt="joined"> Joined January 2017</li>
+      <li><img src="/assets/images/born.svg" alt="born"> Born the 10th of January 1996</li>
+    </ul>
+
+    <div class="widget followers">
+      <strong>
+        <img src="/assets/images/followers.svg" alt="followers"> 120 followers that you know
+      </strong>
+      <ul>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+      </ul>
+    </div>
+
+    <div class="widget images">
+      <strong>
+        <img src="/assets/images/images.svg" alt="images"> 360 Photos and videos
+      </strong>
+      <ul>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+      </ul>
+    </div>
+  </aside>
+
+  <section class="timeline">
+    <nav>
+      <a href="#" class="active">Tweets</a>
+      <a href="#">Tweets and replies</a>
+      <a href="#">Medias</a>
+    </nav>
+    <form action="/api/posts" method="post">
+      <div class="form-control">
+        <label>
+          <input name="text" type="text" placeholder="What's happening?">
+        </label>
+      </div>
+      <button type="submit" class="btn primary">Tweet</button>
+    </form>
+    <div id="post-container"></div>
+    <script type="text/babel">
+      function Post() {
+        const [tweets, setTweets] = React.useState([]);
+        const [listening, setListening] = React.useState(false);
+        let eventSource = undefined;
+
+        React.useEffect(() => {
+          if (!listening) {
+            eventSource = new EventSource("http://localhost:3000/api/posts");
+
+            eventSource.onopen = event => {
+              console.log("connection opened");
+            };
+
+            eventSource.onmessage = event => {
+              const parsedData = JSON.parse(event.data);
+              console.log(parsedData);
+              setTweets(elem => elem.concat(parsedData));
+            };
+
+            eventSource.onerror = event => {
+              console.log(event.target.readyState);
+              if (event.target.readyState === EventSource.CLOSED) {
+                console.log(`eventsource closed ${event.target.readyState}`);
+              }
+              eventSource.close();
+            };
+
+            setListening(true);
+          }
+          return () => {
+            eventSource.close();
+            console.log("eventsource closed");
+          };
+        }, []);
+
+        return (
+          <ul className="tweets">
+            {
+              tweets.map((tweet, index) => (
+                <li key={index}>
+                  <img src="./assets/images/avatar.png" alt="Avatar" />
+                  <div className="info">
+                    <strong>
+                      <span>@potato</span>
+                    </strong>
+
+                    <p>
+                      {tweet.text}
+                    </p>
+                    <div className="actions">
+                      <a href="#">
+                        <img
+                          src="./assets/images/comments.svg"
+                          alt="Comments"
+                        />
+                        9
+                      </a>
+                      <a href="#">
+                        <img
+                          src="/assets/images/retweet.svg"
+                          alt="Retweet"
+                        />
+                        15
+                      </a>
+                      <a href="#">
+                        <img src="/assets/images/like.svg" alt="Like" /> 20
+                      </a>
+                    </div>
+                  </div>
+                </li>
+              ))}
+          </ul>
+        );
+      }
+
+      const domContainer = document.querySelector("#post-container");
+      const root = ReactDOM.createRoot(domContainer);
+      root.render(<Post />);
+    </script>
+    <ul class="tweets">
+
+      <li>
+        <img src="/assets/images/avatar.png" alt="Avatar">
+        <div class="info">
+          <strong>Ben Taylor <span>@potato</span></strong>
+          <p>This is awesome! We should make a project together as soon as possible</p>
+          <div class="actions">
+            <a href="#"><img src="/assets/images/comments.svg" alt="Comments"> 9</a>
+            <a href="#"><img src="/assets/images/retweet.svg" alt="Retweet"> 15</a>
+            <a href="#"><img src="/assets/images/like.svg" alt="Like"> 20</a>
+          </div>
+        </div>
+      </li>
+      <li>
+        <img src="/assets/images/avatar.png" alt="Avatar">
+        <div class="info">
+          <strong>Ben Taylor <span>@potato</span></strong>
+
+          <p>This is awesome! We should make a project together as soon as possible</p>
+          <div class="actions">
+            <a href="#"><img src="/assets/images/comments.svg" alt="Comments"> 9</a>
+            <a href="#"><img src="/assets/images/retweet.svg" alt="Retweet"> 15</a>
+            <a href="#"><img src="/assets/images/like.svg" alt="Like"> 20</a>
+          </div>
+        </div>
+      </li>
+      <li>
+        <img src="/assets/images/avatar.png" alt="Avatar">
+        <div class="info">
+          <strong>Ben Taylor <span>@potato</span></strong>
+          <p>This is awesome! We should make a project together as soon as possible</p>
+          <div class="actions">
+            <a href="#"><img src="/assets/images/comments.svg" alt="Comments"> 9</a>
+            <a href="#"><img src="/assets/images/retweet.svg" alt="Retweet"> 15</a>
+            <a href="#"><img src="/assets/images/like.svg" alt="Like"> 20</a>
+          </div>
+        </div>
+      </li>
+      <li>
+        <img src="/assets/images/avatar.png" alt="Avatar">
+        <div class="info">
+          <strong>Ben Taylor <span>@potato</span></strong>
+          <p>This is awesome! We should make a project together as soon as possible</p>
+          <div class="actions">
+            <a href="#"><img src="/assets/images/comments.svg" alt="Comments" /> 9</a>
+            <a href="#"><img src="/assets/images/retweet.svg" alt="Retweet" /> 15</a>
+            <a href="#"><img src="/assets/images/like.svg" alt="Like" /> 20</a>
+          </div>
+        </div>
+      </li>
+    </ul>
+  </section>
+
+  <aside class="widgets">
+    <div class="widget follow">
+      <div class="title">
+        <strong>Who to follow</strong>
+        <a href="#">Refresh</a>
+        <a href="#">View all</a>
+      </div>
+
+      <ul>
+        <li>
+          <div class="profile">
+            <img src="/assets/images/avatar.png" alt="Avatar" />
+            <div class="info">
+              <strong>Spade <span>@spade_be</span></strong>
+              <button>Follow</button>
+            </div>
+          </div>
+          <a href="#">X</a>
+        </li>
+        <li>
+          <div class="profile">
+            <img src="/assets/images/avatar.png" alt="Avatar" />
+            <div class="info">
+              <strong>Spade <span>@spade_be</span></strong>
+              <button>Follow</button>
+            </div>
+          </div>
+          <a href="#">X</a>
+        </li>
+        <li>
+          <div class="profile">
+            <img src="/assets/images/avatar.png" alt="Avatar" />
+            <div class="info">
+              <strong>Spade <span>@spade_be</span></strong>
+              <button>Follow</button>
+            </div>
+          </div>
+          <a href="#">X</a>
+        </li>
+      </ul>
+    </div>
+  </aside>
+</div>
+</body>
+</html>

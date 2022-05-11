@@ -13,7 +13,7 @@ import { Request } from 'express';
 import { PostService } from './post.service';
 import { CreatePostDto } from './post.dto';
 
-@Controller('/api/posts')
+@Controller('/posts')
 export class PostController {
     constructor(
         @Inject(PostService) private readonly postService: PostService,
@@ -28,10 +28,19 @@ export class PostController {
 
     @HttpCode(HttpStatus.OK)
     @Get()
-    async findAll(@Query('page') page: number, @Query('limit') limit: number) {
-        return await this.postService.findAllPosts({
-            page: Number(!page || page <= 0 ? 1 : page),
-            limit: Number(!limit || limit <= 0 || limit > 100 ? 100 : limit),
-        });
+    async findAll(
+        @Query('page') page: number,
+        @Query('limit') limit: number,
+        @Req() request: Request,
+    ) {
+        return await this.postService.findAllPosts(
+            {
+                page: Number(!page || page <= 0 ? 1 : page),
+                limit: Number(
+                    !limit || limit <= 0 || limit > 100 ? 100 : limit,
+                ),
+            },
+            request,
+        );
     }
 }

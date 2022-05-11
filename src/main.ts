@@ -1,10 +1,9 @@
 import { NestFactory } from '@nestjs/core';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { join } from 'path';
+import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
-import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 
 const runNestApplication = async (configService: ConfigService) => {
     const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -25,6 +24,7 @@ const runNestApplication = async (configService: ConfigService) => {
             },
         },
     });
+    app.setGlobalPrefix('api');
     app.useGlobalPipes(
         new ValidationPipe({
             disableErrorMessages: false,
@@ -32,9 +32,6 @@ const runNestApplication = async (configService: ConfigService) => {
             transform: true,
         }),
     );
-    app.useStaticAssets(join(__dirname, '..', 'public'));
-    app.setBaseViewsDir(join(__dirname, '..', 'views'));
-    app.setViewEngine('ejs');
     const port = configService.get<number>('PORT');
     await app.listen(port ?? 3001);
     Logger.log(`Application is running on: ${await app.getUrl()}`);

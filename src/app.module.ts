@@ -1,10 +1,11 @@
-import { Module, OnModuleInit } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { getTypeOrmConfigFactory } from './config/data-source.config';
 import joiSchemaConfig from './config/joi-schema.config';
-import { AppController } from './app.controller';
 import { SharedModule } from './shared/shared.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
     imports: [
@@ -18,12 +19,11 @@ import { SharedModule } from './shared/shared.module';
             inject: [ConfigService],
             useFactory: getTypeOrmConfigFactory,
         }),
+        ServeStaticModule.forRoot({
+            rootPath: join(__dirname, '..', 'public'),
+            exclude: ['/api*'],
+        }),
         SharedModule,
     ],
-    controllers: [AppController],
 })
-export class AppModule implements OnModuleInit {
-    onModuleInit(): void {
-        console.log('The module has been initialized.');
-    }
-}
+export class AppModule {}
