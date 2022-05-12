@@ -1,12 +1,12 @@
 # compiled output
-/dist
-/node_modules
-/cockroach-data
-/roach-0
-/roach-1
-/roach-2
+**/dist
+**/node_modules
+**/cockroach-data
+**/roach-0
+**/roach-1
+**/roach-2
 *.code-workspace
-/certs
+**/certs
 
 # Logs
 logs

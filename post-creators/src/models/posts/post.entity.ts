@@ -3,11 +3,6 @@ import { AbstractEntity } from '../abstract/abstract.entity';
 
 @Entity('posts')
 export class PostEntity extends AbstractEntity {
-    constructor(subscriptionData: Partial<PostEntity>) {
-        super();
-        Object.assign(this, subscriptionData);
-    }
-
-    @Column({ type: 'varchar', length: 255, nullable: true })
+    @Column({ type: 'varchar', length: 255, nullable: false })
     public text: string;
 }

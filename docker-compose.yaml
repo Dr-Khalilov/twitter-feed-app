@@ -53,9 +53,9 @@ services:
     hostname: lb
     image: haproxy
     ports:
-      - "26000:26257"
-      - "8080:8080"
-      - "8081:8081"
+      - '26000:26257'
+      - '8080:8080'
+      - '8081:8081'
     volumes:
       - ./haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
     depends_on:
@@ -71,21 +71,35 @@ services:
       - certs-client:/certs
     depends_on:
       - lb
-  main:
-    container_name: main
+  intermediary:
+    container_name: intermediary
     build:
-      context: ./
-      dockerfile: ./Dockerfile
+      context: ./intermediary
+      dockerfile: Dockerfile
     volumes:
-      - .:/usr/src/app
+      - ./intermediary:/usr/src/app
     env_file:
-      - ./.env
+      - ./intermediary/.env
     ports:
-      - ${PORT}:${PORT}
+      - '3000:3000'
       - '9229:9229'
     command: npm run start:dev
     depends_on:
+      - rabbitmq
+      - post-create
+  post-create:
+    container_name: post-create
+    build:
+      context: ./post-creators
+      dockerfile: Dockerfile
+    volumes:
+      - ./post-creators:/usr/src/app
+    command: npm run start:dev
+    env_file:
+      - ./post-creators/.env
+    depends_on:
       - roach-0
+      - rabbitmq
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq
@@ -93,8 +107,8 @@ services:
     volumes:
       - /var/lib/rabbitmq
     ports:
-      - "5672:5672"
-      - "15672:15672"
+      - '5672:5672'
+      - '15672:15672'
     env_file:
       - ./rabbitmq.env
 

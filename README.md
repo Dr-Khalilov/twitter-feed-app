@@ -16,10 +16,10 @@
     - monitor the status of services via `docker-compose logs`
 2) `docker compose ps`
 
-### Open new tab terminal
+### Open new tab terminal and run the command
 
 ```bash
-docker cp roach-0:/certs .
+ docker cp roach-0:/certs ./post-creators/
 ```
 
 ### Open Interactive Shells
