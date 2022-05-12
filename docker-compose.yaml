@@ -71,6 +71,19 @@ services:
       - certs-client:/certs
     depends_on:
       - lb
+  post-creators:
+    container_name: post-creators
+    build:
+      context: ./post-creators
+      dockerfile: Dockerfile
+    volumes:
+      - ./post-creators:/usr/src/app
+    command: npm run start:dev
+    env_file:
+      - ./post-creators/.env
+    depends_on:
+      - roach-0
+      - rabbitmq
   intermediary:
     container_name: intermediary
     build:
@@ -86,20 +99,7 @@ services:
     command: npm run start:dev
     depends_on:
       - rabbitmq
-      - post-create
-  post-create:
-    container_name: post-create
-    build:
-      context: ./post-creators
-      dockerfile: Dockerfile
-    volumes:
-      - ./post-creators:/usr/src/app
-    command: npm run start:dev
-    env_file:
-      - ./post-creators/.env
-    depends_on:
-      - roach-0
-      - rabbitmq
+      - post-creators
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq
@@ -117,4 +117,5 @@ volumes:
   certs-roach-1:
   certs-roach-2:
   certs-client:
-
+  post-creators:
+  intermediary:

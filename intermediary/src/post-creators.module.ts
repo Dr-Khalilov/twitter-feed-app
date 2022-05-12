@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { PostController } from './post.controller';
 import { ClientProxyFactory, Transport } from '@nestjs/microservices';
+import { PostController } from './post.controller';
 
 @Module({
     imports: [ConfigModule],
