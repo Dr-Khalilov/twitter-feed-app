@@ -5,7 +5,9 @@
 * `roach-2` - CockroachDB node
 * `lb` - HAProxy acting as load balancer
 * `roach-cert` - Holds certificates as volume mounts
-* `main` - Backend app
+* `intermediary` - Backend app - 1
+* `post-creators` - Backend app -2
+* `rabbitmq` - The broker of messages
 
 ## Getting started
 
@@ -16,11 +18,19 @@
     - monitor the status of services via `docker-compose logs`
 2) `docker compose ps`
 
-### Open new tab terminal and run the command
+### Open new tab terminal and run the command when nodes like roach-0, roach-1 and roach-2 start up
 
 ```bash
  docker cp roach-0:/certs ./post-creators/
 ```
+
+## Rabbitmq
+
+http:localhost:15672 - Admin panel for rabbitmq!
+#### login - guest,
+#### password - guest
+
+### Enjoy it
 
 ### Open Interactive Shells
 
