@@ -6,9 +6,6 @@
         content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <link rel="stylesheet" type="text/css" href="./assets/styles/style.css">
-  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <title>Twitter Profile</title>
 </head>
 <body>
@@ -126,65 +123,121 @@
     <div id="bot-container"></div>
     <div id="post-container"></div>
     <script type="text/babel">
-      const Bot = () => {
-        const [count, setCounter] = React.useState(10000);
-        const [step, setStep] = React.useState(1000);
-        const [isAdd, setIsAdd] = React.useState(true);
-        const [value, setValue] = React.useState("");
+      class Bot extends React.Component {
+        constructor(props) {
+          super(props);
+          this.intervalId = null;
+          this.state = {
+            count: 10000,
+            step: 5000,
+            isAdd: true,
+            value: "",
+            isFetching: false
+          };
+        }
 
-        const handleClick = () => {
-          if (isAdd) {
-            setCounter(count + step);
-          } else if (!isAdd && count > 0) {
-            setCounter(count - step);
-          }
+        handleClick = () => {
+          this.setState(({
+                           count,
+                           step,
+                           isAdd
+                         }) => {
+            if (isAdd) {
+              return { count: count + step };
+            } else if (count === 0) {
+              return { count: 0 };
+            } else {
+              return { count: count - step };
+            }
+          });
         };
-        const editStep = ({ target: { value } }) => setStep(Number(value));
-        const changeMode = () => setIsAdd(!isAdd);
-        const generateText = () => {
+
+        editStep = ({ target: { value } }) => this.setState({ step: Number(value) });
+
+        changeMode = () => this.setState(({ isAdd }) => ({ isAdd: !isAdd }));
+
+        setValue = (value) => {
+          this.setState({
+            value
+          });
+        };
+
+        generateText = () => {
           const head = Date.now().toString(36);
           const tail = Math.random().toString(36).substring(2);
           return `${head}${tail}`;
         };
-        setInterval(() => {
+
+        startFetching = () => this.setState({ isFetching: true });
+
+        stopFetching = () => this.setState({ isFetching: false });
+
+        clearFetching = () => {
+          clearInterval(this.intervalId);
+          this.intervalId = null;
+        };
+
+        messageBot = () => {
           fetch("http://localhost:3000/api/posts", {
             method: "POST",
             headers: {
               "Content-Type": "application/json;charset=utf-8"
             },
-            body: JSON.stringify({ text: generateText() })
+            body: JSON.stringify({ text: this.generateText() })
           });
-        }, count);
-        return (
-          <>
-            <form action="/api/posts" onSubmit={(event) => {
-              event.preventDefault();
-              fetch("http://localhost:3000/api/posts", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json;charset=utf-8"
-                },
-                body: JSON.stringify({ text: value })
-              });
+        };
 
-            }} method="post">
-              <div className="form-control">
-                <label>
-                  <input name="text" value={value} onChange={({ target: { value } }) => setValue(value)} type="text"
-                         placeholder="What's happening?" />
-                </label>
-              </div>
-              <button type="submit" className="btn primary">Tweet</button>
-            </form>
-            <h1>Current step: {step} seconds</h1>
-            <input type="number" name="number" value={step} onChange={editStep} placeholder="Number" />
-            <h1>Generation rate: {count} seconds</h1>
-            <button onClick={changeMode}>Change Mode</button>
-            &nbsp;
-            <button onClick={handleClick}>{isAdd ? "UPP" : "DOWN"}</button>
-          </>
-        );
-      };
+        componentDidMount() {
+          this.startFetching();
+        }
+
+        componentDidUpdate() {
+          const { isFetching, count } = this.state;
+          this.clearFetching();
+          if (isFetching) {
+            this.intervalId = setInterval(this.messageBot, count);
+          }
+        }
+
+        componentWillUnmount() {
+          this.stopFetching();
+          this.clearFetching();
+        }
+
+        render() {
+          const { count, step, isAdd, value } = this.state;
+          return (
+            <>
+              <form action="/api/posts" onSubmit={(event) => {
+                event.preventDefault();
+                fetch("http://localhost:3000/api/posts", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json;charset=utf-8"
+                  },
+                  body: JSON.stringify({ text: value })
+                });
+
+              }} method="post">
+                <div className="form-control">
+                  <label>
+                    <input name="text" value={value} onChange={({ target: { value } }) => this.setValue(value)}
+                           type="text"
+                           placeholder="What's happening?" />
+                  </label>
+                </div>
+                <button type="submit" className="btn primary">Tweet</button>
+              </form>
+              <h1>Current step: {step} seconds</h1>
+              <input type="number" name="number" value={step} onChange={this.editStep} placeholder="Number" />
+              <h1>Generation rate: {count} seconds</h1>
+              <button onClick={this.changeMode}>Change Mode</button>
+              &nbsp;
+              <button onClick={this.handleClick}>{isAdd ? "UPP" : "DOWN"}</button>
+            </>
+          );
+        }
+      }
 
       const container = document.querySelector("#bot-container");
       const root = ReactDOM.createRoot(container);
@@ -193,74 +246,93 @@
     <script type="text/babel">
       const Post = () => {
         const [tweets, setTweets] = React.useState([]);
-        const [listening, setListening] = React.useState(false);
-        let eventSource = undefined;
-
-        React.useEffect(() => {
-          if (!listening) {
-            eventSource = new EventSource("http://localhost:3000/api/posts");
-
-            eventSource.onopen = event => {
-              console.log("connection opened");
-            };
-
-            eventSource.onmessage = event => {
-              const parsedData = JSON.parse(event.data);
-              setTweets(elem => elem.concat(parsedData));
-            };
-
-            eventSource.onerror = event => {
-              console.log(event.target.readyState);
-              if (event.target.readyState === EventSource.CLOSED) {
-                console.log(`eventsource closed ${event.target.readyState}`);
+        const readChunks = (reader) => {
+          return {
+            async* [Symbol.asyncIterator]() {
+              let readResult = await reader.read();
+              while (!readResult.done) {
+                yield readResult.value;
+                readResult = await reader.read();
               }
-              eventSource.close();
-            };
-
-            setListening(true);
-          }
-          return () => {
-            eventSource.close();
-            console.log("eventsource closed");
+            }
           };
-        }, []);
+        };
+
+        async function* readLines(reader) {
+          const textDecoder = new TextDecoder();
+          let partOfLine = "";
+          for await (const chunk of readChunks(reader)) {
+            const chunkText = textDecoder.decode(chunk);
+            const chunkLines = chunkText.split("\n");
+            if (chunkLines.length === 1) {
+              partOfLine += chunkLines[0];
+            } else if (chunkLines.length > 1) {
+              yield partOfLine + chunkLines[0];
+              for (let i = 1; i < chunkLines.length - 1; i++) {
+                yield chunkLines[i];
+              }
+              partOfLine = chunkLines[chunkLines.length - 1];
+            }
+          }
+        }
+
+        async function* parseJsonStream(readableStream) {
+          for await (const line of readLines(readableStream.getReader())) {
+            const trimmedLine = line.trim().replace(/,$/, "");
+            if (trimmedLine !== "[" && trimmedLine !== "]") {
+              yield JSON.parse(trimmedLine);
+            }
+          }
+        }
+
+        const downloadData = async () => {
+          const response = await fetch("http://localhost:3000/api/posts");
+          let jsonData = 0;
+          for await (const post of parseJsonStream(response.body)) {
+            jsonData++;
+            setTweets(post);
+          }
+        };
+        downloadData();
 
         return (
           <ul className="tweets">
             {
-              tweets.map((tweet, index) => (
-                <li key={index}>
-                  <img src="./assets/images/avatar.png" alt="Avatar" />
-                  <div className="info">
-                    <strong>
-                      <span>@potato</span>
-                    </strong>
+              tweets.map((tweet) => {
+                return (
+                  <li key={tweet.id}>
+                    <img src="./assets/images/avatar.png" alt="Avatar" />
+                    <div className="info">
+                      <strong>
+                        <span>@potato</span>
+                      </strong>
 
-                    <p>
-                      {tweet.text}
-                    </p>
-                    <div className="actions">
-                      <a href="#">
-                        <img
-                          src="./assets/images/comments.svg"
-                          alt="Comments"
-                        />
-                        9
-                      </a>
-                      <a href="#">
-                        <img
-                          src="./assets/images/retweet.svg"
-                          alt="Retweet"
-                        />
-                        15
-                      </a>
-                      <a href="#">
-                        <img src="./assets/images/like.svg" alt="Like" /> 20
-                      </a>
+                      <p>
+                        {tweet.text}
+                      </p>
+                      <div className="actions">
+                        <a href="#">
+                          <img
+                            src="./assets/images/comments.svg"
+                            alt="Comments"
+                          />
+                          9
+                        </a>
+                        <a href="#">
+                          <img
+                            src="./assets/images/retweet.svg"
+                            alt="Retweet"
+                          />
+                          15
+                        </a>
+                        <a href="#">
+                          <img src="./assets/images/like.svg" alt="Like" /> 20
+                        </a>
+                      </div>
                     </div>
-                  </div>
-                </li>
-              ))}
+                  </li>
+                );
+              })}
           </ul>
         );
       };
@@ -314,5 +386,8 @@
     </div>
   </aside>
 </div>
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </body>
 </html>

@@ -78,12 +78,14 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./post-creators:/usr/src/app
+      - /usr/src/app/node_modules
     command: npm run start:dev
     env_file:
       - ./post-creators/.env
     depends_on:
       - roach-0
       - rabbitmq
+    restart: unless-stopped
   intermediary:
     container_name: intermediary
     build:
@@ -91,6 +93,7 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./intermediary:/usr/src/app
+      - /usr/src/app/node_modules
     env_file:
       - ./intermediary/.env
     ports:
@@ -100,6 +103,7 @@ services:
     depends_on:
       - rabbitmq
       - post-creators
+    restart: unless-stopped
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq

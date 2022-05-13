@@ -11,8 +11,8 @@ import {
     Req,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { Request } from 'express';
 import { CreatePostDto } from './post.dto';
+import { Request } from 'express';
 
 @Injectable()
 @Controller('/posts')
@@ -40,7 +40,7 @@ export class PostController {
         @Query('limit') limit: number,
         @Req() request: Request,
     ) {
-        const data = await this.postCreatorsService.send(
+        const data = this.postCreatorsService.send(
             {
                 cmd: 'find-all-posts',
             },
@@ -52,28 +52,9 @@ export class PostController {
             },
         );
 
-        const headers = {
-            'Content-Type': 'text/event-stream',
-            Connection: 'keep-alive',
-            'Cache-Control': 'no-cache',
-        };
-        await data.forEach(item => {
-            request.res.writeHead(200, headers);
-            const data = `data: ${JSON.stringify(item.data)}\n\n`;
-            request.res.write(data);
-            const clientId = Date.now();
-            let clients = [];
-            const newClient = {
-                id: clientId,
-                request,
-            };
-            clients.push(newClient);
-
-            request.on('close', () => {
-                console.log(`${clientId} Connection closed`);
-                clients = clients.filter(client => client.id !== clientId);
-                request.res.end();
-            });
+        request.res.setHeader('Transfer-Encoding', 'chunked');
+        await data.forEach(elem => {
+            request.res.write(`${JSON.stringify(elem.data)}\n`);
         });
     }
 }

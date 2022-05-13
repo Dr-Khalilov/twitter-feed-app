@@ -3,7 +3,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PostEntity } from './post.entity';
 import { CreatePostDto } from './post.dto';
-import { IQuery } from './query.interface';
+import { IQuery } from '../../utils/query.interface';
 import { paginateResponse } from '../../utils/paginate.util';
 import { PostRepository } from './post.repository';
 import { IPaginate } from '../../utils/paginate.interface';

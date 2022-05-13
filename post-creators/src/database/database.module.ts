@@ -19,9 +19,13 @@ import { readFileSync } from 'fs';
                 synchronize: configService.get<boolean>('TYPEORM_SYNC'),
                 autoLoadEntities: configService.get<boolean>('LOAD_ENTITIES'),
                 ssl: {
-                    ca: readFileSync('./certs/ca.crt'),
-                    key: readFileSync('./certs/client.root.key'),
-                    cert: readFileSync('./certs/client.root.crt'),
+                    ca: readFileSync('./certs/ca.crt', { encoding: 'utf-8' }),
+                    key: readFileSync('./certs/client.root.key', {
+                        encoding: 'utf-8',
+                    }),
+                    cert: readFileSync('./certs/client.root.crt', {
+                        encoding: 'utf-8',
+                    }),
                 },
             }),
         }),

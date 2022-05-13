@@ -7,6 +7,7 @@ import {
     RmqContext,
 } from '@nestjs/microservices';
 import { CreatePostDto } from './post.dto';
+import { IQuery } from '../../utils/query.interface';
 
 @Controller()
 export class PostController {
@@ -25,7 +26,7 @@ export class PostController {
     }
 
     @MessagePattern({ cmd: 'find-all-posts' })
-    async findAllPosts(@Payload() { page, limit }) {
+    async findAllPosts(@Payload() { page, limit }: IQuery) {
         return await this.postService.findAllPosts({
             page,
             limit,

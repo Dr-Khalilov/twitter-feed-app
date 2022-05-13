@@ -1,8 +1,6 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import * as Joi from 'joi';
-import { PostEntity } from './models/posts/post.entity';
 import { DatabaseModule } from './database/database.module';
 import { PostModule } from './models/posts/post.module';
 
