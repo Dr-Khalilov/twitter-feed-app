@@ -19,7 +19,6 @@ import { PostModule } from './models/posts/post.module';
                 DB_NAME: Joi.string().required(),
                 TYPEORM_SYNC: Joi.boolean().required(),
                 LOAD_ENTITIES: Joi.boolean().required(),
-                PORT: Joi.number().required(),
                 RABBITMQ_USER: Joi.string().required(),
                 RABBITMQ_PASSWORD: Joi.string().required(),
                 RABBITMQ_HOST: Joi.string().required(),

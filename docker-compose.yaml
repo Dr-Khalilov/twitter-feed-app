@@ -104,6 +104,20 @@ services:
       - rabbitmq
       - post-creators
     restart: unless-stopped
+  frontend:
+    container_name: frontend
+    build:
+      context: ./frontend
+      dockerfile: ./Dockerfile
+    volumes:
+      - ./frontend:/usr/src/app
+      - /usr/src/app/node-modules
+    ports:
+      - '3000:3000'
+    command: npm start
+    depends_on:
+      - intermediary
+    restart: unless-stopped
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq
@@ -123,3 +137,4 @@ volumes:
   certs-client:
   post-creators:
   intermediary:
+  frontend:
