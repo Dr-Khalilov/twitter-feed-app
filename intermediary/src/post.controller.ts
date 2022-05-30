@@ -10,9 +10,9 @@ import {
     Query,
     Req,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { ClientProxy } from '@nestjs/microservices';
 import { CreatePostDto } from './post.dto';
-import { Request } from 'express';
 
 @Injectable()
 @Controller('/posts')
@@ -52,8 +52,12 @@ export class PostController {
             },
         );
 
-        request.res.setHeader('Transfer-Encoding', 'chunked');
         await data.forEach(elem => {
+            request.res.writeHead(200, {
+                'Content-Type': 'text/plain',
+                'Transfer-Encoding': 'chunked',
+                'X-Content-Type-Options': 'nosniff',
+            });
             request.res.write(`${JSON.stringify(elem.data)}\n`);
         });
     }

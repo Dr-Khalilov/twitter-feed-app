@@ -1,4 +1,4 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Inject, Injectable } from '@nestjs/common';
 import { PostService } from './post.service';
 import {
     Ctx,
@@ -9,9 +9,12 @@ import {
 import { CreatePostDto } from './post.dto';
 import { IQuery } from '../../utils/query.interface';
 
-@Controller()
+@Controller('/posts')
+@Injectable()
 export class PostController {
-    constructor(private readonly postService: PostService) {}
+    constructor(
+        @Inject(PostService) private readonly postService: PostService,
+    ) {}
 
     @MessagePattern({ cmd: 'create-post' })
     async createPost(
